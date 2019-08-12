@@ -25,8 +25,6 @@
 
 #include "abstractdividerslider.h"
 
-class SliderHandle;
-
 class PieChartSlider : public AbstractDividerSlider
 {
     Q_OBJECT
