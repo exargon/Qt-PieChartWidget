@@ -94,7 +94,7 @@ private:
 
     bool onHandle(const Handle& handle, QPoint mouse_pos) const;
 
-    void bindEqualDividers(int index);
+    void setEmptySectorsCollapsed(int index);
 
     /* Painting helpers */
     QRectF boundingRect(const Handle& handle) const;
@@ -109,6 +109,8 @@ private:
 
     QVector<DividerHandle> divider_handles;
     QVector<SectorHandle> sector_handles;
+
+    int handle_start_angle;
 };
 
 #endif // PIECHARTSLIDER_H

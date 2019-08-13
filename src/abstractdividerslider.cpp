@@ -34,7 +34,7 @@ AbstractDividerSlider::AbstractDividerSlider(int number_of_dividers, int total, 
         divider_values.push_back(std::min(i*divider_spacing, total_value));
     }
 
-    dividers_bound.fill(false,numberOfDividers() - 1);
+    sectors_collapsed.fill(false,numberOfSectors());
 }
 
 void AbstractDividerSlider::setTotal(int total){
@@ -60,9 +60,9 @@ void AbstractDividerSlider::setDividerValue(int index, int value){
     if (value == dividerValue(index)) return;
 
     int min = index;
-    for (; min > 0 && dividers_bound[min - 1]; --min);
+    for (; min > 0 && sectors_collapsed[min]; --min);
     int max = index;
-    for (; max < numberOfDividers() - 1 && dividers_bound[max]; ++max);
+    for (; max < numberOfDividers() - 1 && sectors_collapsed[max + 1]; ++max);
 
     setDividersInRange(min, max, value);
     update();
@@ -92,24 +92,24 @@ void AbstractDividerSlider::setDividersInRange(int first, int last, int value){
 }
 
 int AbstractDividerSlider::dividerMinimum(int index) const{
-    for (; index > 0 && dividers_bound[index - 1]; --index);
+    for (; index > 0 && sectors_collapsed[index]; --index);
     return (index == 0) ? 0 : divider_values[index - 1];
 }
 
 int AbstractDividerSlider::dividerMaximum(int index) const{
-    for (; index < numberOfDividers() - 1 && dividers_bound[index]; ++index);
+    for (; index < numberOfDividers() - 1 && sectors_collapsed[index + 1]; ++index);
     return (index == numberOfDividers() - 1) ? total_value : divider_values[index + 1];
 }
 
 void AbstractDividerSlider::setSectorValue(int index, int value){
     if (value == sectorValue(index)) return;
+    sectors_collapsed[index] = false;
 
     if (index == number_of_dividers){
         setDividerValue(index - 1, total_value - value);
     } else if (index == 0){
         setDividerValue(index, value);
-    } else {
-        dividers_bound[index - 1] = false;
+    } else {     
         setDividerValue(index, divider_values[index - 1] + value);
     }
 }
@@ -124,8 +124,6 @@ int AbstractDividerSlider::sectorValue(int index) const{
     }
 }
 
-void AbstractDividerSlider::setDividersBoundness(int first, bool boundness){
-    if (first >= numberOfDividers() - 1) return;
-
-    dividers_bound[first] = boundness;
+void AbstractDividerSlider::setSectorCollapsed(int index, bool is_collapsed){
+    sectors_collapsed[index] = is_collapsed;
 }

@@ -55,14 +55,18 @@ protected:
     virtual void moveHandles(int index, int value) = 0;
 
     void setDividersInRange(int first, int last, int value);
-    void setDividersBoundness(int first, bool boundness);
+
+    /* Setting a sector as collapsed implies a value of zero and
+     * prevents it from blocking divider movement. Automatically unblocked
+     * when value changed through setSectorValue */
+    void setSectorCollapsed(int first, bool is_collapsed);
 
 private:
     int total_value;
     int number_of_dividers;
 
     QVector<int> divider_values;
-    QVector<bool> dividers_bound;
+    QVector<bool> sectors_collapsed;
 };
 
 #endif // ABSTRACTDIVIDERSLIDER_H

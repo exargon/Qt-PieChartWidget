@@ -60,11 +60,7 @@ PieChartSlider::PieChartSlider(int number_of_dividers, int total, QWidget* paren
 
 void PieChartSlider::moveHandles(int index, int value){
     divider_handles[index].angle = valueToAngle(value);
-
-    //Don't move when pressed because it's a reference point
-    if (!sector_handles[index].is_pressed){
-            sector_handles[index].angle = divider_handles[index].angle;
-    }
+    sector_handles[index].angle = divider_handles[index].angle;
 }
 
 void PieChartSlider::updateSectorHandels(int index, int value){
@@ -134,7 +130,7 @@ void PieChartSlider::mousePressEvent(QMouseEvent *event){
     if (event->button() != Qt::LeftButton) return;
 
     for (auto handle = divider_handles.begin(); handle != divider_handles.end(); ++handle){
-        bindEqualDividers(handle - divider_handles.begin());
+        setEmptySectorsCollapsed(handle - divider_handles.begin());
         if (onHandle(*handle, event->pos())){
             handle->is_pressed = true;
             repaint(boundingRect(*handle).toAlignedRect());
@@ -144,6 +140,7 @@ void PieChartSlider::mousePressEvent(QMouseEvent *event){
     for (SectorHandle& handle : sector_handles){
         if (handle.visible && onHandle(handle, event->pos())){
             handle.is_pressed = true;
+            handle_start_angle = handle.angle;
             repaint(boundingRect(handle).toAlignedRect());
             return;
         }
@@ -169,7 +166,6 @@ void PieChartSlider::mouseMoveEvent(QMouseEvent *event){
             processSectorMouseInput(index, event->pos());
         }
     }
-
     for (int index = 0; index < numberOfDividers(); ++index){
         if (divider_handles[index].is_pressed){
             setDividerValueFromMouse(index, event->pos());
@@ -179,26 +175,24 @@ void PieChartSlider::mouseMoveEvent(QMouseEvent *event){
 
 void PieChartSlider::processSectorMouseInput(int index, QPoint mouse_pos){
     int angle = angleFromMouse(index, mouse_pos);
-    const int start_angle = sector_handles[index].angle;
-
-    if (angle == start_angle) return;
+    if (angle == handle_start_angle) return;
 
     if (index < numberOfDividers() && index > 0){
-        setDividersBoundness(index - 1, false);
+        setSectorCollapsed(index, false);
     }
-    if (angle < start_angle && index > 0){
+    if (angle < handle_start_angle && index > 0){
         divider_handles[index - 1].is_pressed = true;
 
         if (index < numberOfDividers() && divider_handles[index].is_pressed){
             divider_handles[index].is_pressed = false;
-            setDividerValue(index, angleToValue(start_angle));
+            setDividerValue(index, angleToValue(handle_start_angle));
         }
-    }else if (angle > start_angle){
+    }else if (angle > handle_start_angle){
         divider_handles[index].is_pressed = true;
 
         if (index > 0 && divider_handles[index - 1].is_pressed){
             divider_handles[index - 1].is_pressed = false;
-            setDividerValue(index - 1, angleToValue(start_angle));
+            setDividerValue(index - 1, angleToValue(handle_start_angle));
         }
     }
 }
@@ -240,7 +234,7 @@ void PieChartSlider::mouseReleaseEvent(QMouseEvent *event){
     for (int index = 0; index < numberOfDividers(); ++index){
         if(divider_handles[index].is_pressed){
             divider_handles[index].is_pressed = false;
-            bindEqualDividers(index);
+            setEmptySectorsCollapsed(index);
             repaint(boundingRect(divider_handles[index]).toAlignedRect());
             break;
         }
@@ -255,12 +249,12 @@ void PieChartSlider::mouseReleaseEvent(QMouseEvent *event){
     }
 }
 
-void PieChartSlider::bindEqualDividers(int index){
+void PieChartSlider::setEmptySectorsCollapsed(int index){
     for(int min = index; min > 0 && sectorValue(min) == 0; --min){
-        setDividersBoundness(min - 1, true);
+        setSectorCollapsed(min, true);
     }
     for(int max = index; max < numberOfDividers() - 1 && sectorValue(max + 1) == 0; ++max){
-        setDividersBoundness(max, true);
+        setSectorCollapsed(max + 1, true);
     }
 }
 

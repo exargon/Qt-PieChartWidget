@@ -29,7 +29,7 @@
 ExampleWidget::ExampleWidget(QWidget *parent) : QWidget(parent)
 {
     /* Initilization constants */
-    const int number_of_dividers = 5;
+    const int number_of_dividers = 6;
     const int initial_total = 100;
     const int max_total = 1000000;
 
