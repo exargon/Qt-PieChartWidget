@@ -59,7 +59,8 @@ protected:
     /* Setting a sector as collapsed implies a value of zero and
      * prevents it from blocking divider movement. Automatically unblocked
      * when value changed through setSectorValue */
-    void setSectorCollapsed(int first, bool is_collapsed);
+    void setSectorCollapsed(int index, bool is_collapsed);
+    bool isSectorCollapsed(int index) const {return sectors_collapsed[index];}
 
 private:
     int total_value;

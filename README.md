@@ -27,4 +27,4 @@ and there is a lot nuance in the way it could behave. Currently I have hard-code
 - Visualizable string labels for each sector
 
 ### Known Bugs:
-- Sectorhandles at 0 and total overlap with eachother instead of stacking.
+- DividerHandles overlap at zero, and not obvious which one you grab.

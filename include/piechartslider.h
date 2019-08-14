@@ -98,7 +98,7 @@ private:
 
     bool onHandle(const Handle& handle, QPoint mouse_pos) const;
 
-    void setEmptySectorsCollapsed(int index);
+    void setEmptySectorsCollapsed();
 
     /* Painting helpers */
     QRectF boundingRect(const Handle& handle) const;

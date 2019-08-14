@@ -64,23 +64,26 @@ void PieChartSlider::moveHandles(int index, int value){
 }
 
 void PieChartSlider::updateSectorHandels(int index, int value){
-    if (value == 0 && !sector_handles[index].visible) {
-        sector_handles[index].visible = true;
+    sector_handles[index].visible = (value == 0)? true : false;
 
-        for (int max = index + 1; max < numberOfSectors() && sector_handles[max].visible; ++max){
-            sector_handles[index].collapse_level += 1;
-        }
-        for (int min = index; min > 0 && sector_handles[min - 1].visible; --min){
-            sector_handles[min - 1].collapse_level = sector_handles[min].collapse_level + 1;
-        }
+    //To make sure max angle handles are updated when a handle at zero has been moved
+    if (sectorValue(index) == dividerValue(index) && index != numberOfSectors() - 1){
+        updateSectorHandels(numberOfSectors() - 1, sectorValue(numberOfSectors() - 1));
+    }
 
-    } else if (value != 0 && sector_handles[index].visible){
-        sector_handles[index].visible = false;
+    std::function<bool(int)> sameAngle = [&](int i)
+        {return sector_handles[i].angle == sector_handles[index].angle;};
 
-        for (int min = index; min > 0 && sector_handles[min - 1].visible; --min){
-            sector_handles[min - 1].collapse_level -= sector_handles[index].collapse_level + 1;
+    if (sector_handles[index].angle == 0 || sector_handles[index].angle == ANGLE_TICKS_IN_CIRCLE){
+        sameAngle = [this](int i)
+            {return sector_handles[i].angle == 0 || sector_handles[i].angle == ANGLE_TICKS_IN_CIRCLE;};
+    }
+
+    int current_level = 0;
+    for (int i = 0; i < numberOfSectors(); ++i){
+        if (sector_handles[i].visible && sameAngle(i)){
+            sector_handles[i].collapse_level = current_level++;
         }
-        sector_handles[index].collapse_level = 0;
     }
 }
 
@@ -131,12 +134,12 @@ void PieChartSlider::wheelEvent(QWheelEvent *event){
 
 void PieChartSlider::mousePressEvent(QMouseEvent *event){
     if (event->button() != Qt::LeftButton) return;
+    setEmptySectorsCollapsed();
 
-    for (auto handle = divider_handles.begin(); handle != divider_handles.end(); ++handle){
-        setEmptySectorsCollapsed(handle - divider_handles.begin());
-        if (onHandle(*handle, event->pos())){
-            handle->is_pressed = true;
-            repaint(boundingRect(*handle).toAlignedRect());
+    for (DividerHandle& handle : divider_handles){
+        if (onHandle(handle, event->pos())){
+            handle.is_pressed = true;
+            repaint(boundingRect(handle).toAlignedRect());
             return;
         }
     }
@@ -180,9 +183,8 @@ void PieChartSlider::processSectorMouseInput(int index, QPoint mouse_pos){
     int angle = angleFromMouse(index, mouse_pos);
     if (angle == handle_start_angle) return;
 
-    if (index < numberOfDividers() && index > 0){
-        setSectorCollapsed(index, false);
-    }
+    setSectorCollapsed(index, false);
+
     if (angle < handle_start_angle && index > 0){
         divider_handles[index - 1].is_pressed = true;
 
@@ -233,11 +235,11 @@ int PieChartSlider::stabilizedValue(int min_index, int max_index, int value) con
 
 void PieChartSlider::mouseReleaseEvent(QMouseEvent *event){
     if (event->button() != Qt::LeftButton) return;
+    setEmptySectorsCollapsed();
 
     for (int index = 0; index < numberOfDividers(); ++index){
         if(divider_handles[index].is_pressed){
             divider_handles[index].is_pressed = false;
-            setEmptySectorsCollapsed(index);
             repaint(boundingRect(divider_handles[index]).toAlignedRect());
             break;
         }
@@ -252,12 +254,11 @@ void PieChartSlider::mouseReleaseEvent(QMouseEvent *event){
     }
 }
 
-void PieChartSlider::setEmptySectorsCollapsed(int index){
-    for(int min = index; min > 0 && sectorValue(min) == 0; --min){
-        setSectorCollapsed(min, true);
-    }
-    for(int max = index; max < numberOfDividers() - 1 && sectorValue(max + 1) == 0; ++max){
-        setSectorCollapsed(max + 1, true);
+void PieChartSlider::setEmptySectorsCollapsed(){
+    for (int i = 0; i < numberOfSectors(); ++i){
+        if(sectorValue(i) == 0){
+            setSectorCollapsed(i, true);
+        }
     }
 }
 
