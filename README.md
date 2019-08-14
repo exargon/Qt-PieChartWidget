@@ -1,6 +1,9 @@
 # Qt-PieChartWidget
 This is a small project to make a dividerslider for use with qt-projects.
 
+### Demonstration with the example widget
+![](examplewidget.gif)
+
 ### What is a dividerslider
 
 A dividerslider is a slider that is used to divide a given number, the total if you will, into a set of smaller numbers
