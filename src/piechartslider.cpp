@@ -292,27 +292,34 @@ void PieChartSlider::paintEvent(QPaintEvent *event){
         painter.drawPie(pie_envelope, divider_handles[index].angle + zero_angle, valueToAngle(sectorValue(sector)));
     }
 
-    /* Draw dividing lines and circle outline */
+    /* Draw the piechart outline */
     painter.setPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::FlatCap));
     painter.setBrush(Qt::NoBrush);
-
-    for (DividerHandle handle : divider_handles){
-        painter.drawLine(pieCentre(), angleToPosition(handle.angle, radius()));
-    }
-    painter.drawLine(pieCentre(), angleToPosition(0, radius()));
-
     painter.drawEllipse(pie_envelope);
 
-    /* Paint divider handles. Reverse so the top handle for the mouse is painted last */
-    for (auto handle = divider_handles.crbegin(); handle != divider_handles.crend(); ++handle){
-        if (handle->is_pressed){
-            painter.setBrush(palette().mid());
-        } else {
-            painter.setBrush(palette().button());
-        }
-        painter.setPen(QPen(palette().shadow(), 0, Qt::SolidLine));
+    /* Paint zero divider if no handle is present */
+    if (divider_handles.back().angle != ANGLE_TICKS_IN_CIRCLE && divider_handles[0].angle != 0){
+        painter.setPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::FlatCap));
+        painter.drawLine(pieCentre(), angleToPosition(0, radius()));
+    }
 
-        painter.drawEllipse(boundingRect(*handle));
+    /* Draw divider lines and handles. Avoid painting overlaps twice, as it is ugly */
+    int prev_angle = -1;
+    for (DividerHandle handle : divider_handles){
+        if (handle.angle != prev_angle){
+            painter.setPen(QPen(Qt::black, 0, Qt::SolidLine, Qt::FlatCap));
+            painter.drawLine(pieCentre(), angleToPosition(handle.angle, radius()));
+
+            if (handle.is_pressed){
+                painter.setBrush(palette().mid());
+            } else {
+                painter.setBrush(palette().button());
+            }
+            painter.setPen(QPen(palette().shadow(), 0, Qt::SolidLine));
+
+            painter.drawEllipse(boundingRect(handle));
+        }
+        prev_angle = handle.angle;
     }
 
     /* Paint the visible sector handles. */
