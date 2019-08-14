@@ -122,7 +122,10 @@ void PieChartSlider::wheelEvent(QWheelEvent *event){
     while(sector_index < numberOfDividers() && dividerValue(sector_index) < angleToValue(positionToAngle(event->pos()))){
           ++sector_index;
     }
-    int delta = (event->angleDelta().y() < 0)? -1 : 1;
+    int delta = angleToValue(event->angleDelta().y()/5);
+    if (delta == 0){
+        delta = (event->angleDelta().y() < 0)? -1 : 1;
+    }
     setSectorValue(sector_index, sectorValue(sector_index) + delta);
 }
 

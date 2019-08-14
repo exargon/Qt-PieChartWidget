@@ -20,7 +20,7 @@ and there is a lot nuance in the way it could behave. Currently I have hard-code
 
 ### Possible future improvements:
 
-- Improve handling of the scroll wheel (symmetric resizing and consistent speed)
+- Improve handling of the scroll wheel (symmetric resizing)
 - Make the divider between zero and total movable
 - Add more configuration options(ways for it to behave)
 - Add an untracked handle option (value does not change before handle is released)
