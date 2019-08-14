@@ -85,7 +85,7 @@ void PieChartSlider::updateSectorHandels(int index, int value){
 }
 
 int PieChartSlider::radius() const{
-    return std::min(width(),height())/2 - DividerHandle::size/2;
+    return std::min(width(),height())/2 - DividerHandle::SIZE/2;
 }
 
 int PieChartSlider::valueToAngle(int value) const{
@@ -150,7 +150,7 @@ void PieChartSlider::mousePressEvent(QMouseEvent *event){
 bool PieChartSlider::onHandle(const Handle& handle, QPoint pos) const{
     QPointF centre = angleToPosition(handle.angle, radius() + handle.radiusOffset());
 
-    return (distance(centre, pos) < handle.size / 2);
+    return (distance(centre, pos) < handle.size() / 2);
 }
 
 qreal distance(const QPointF& first, const QPointF& second){
@@ -261,8 +261,8 @@ void PieChartSlider::setEmptySectorsCollapsed(int index){
 QRectF PieChartSlider::boundingRect(const Handle& handle) const{
     QPointF centre = angleToPosition(handle.angle, radius() + handle.radiusOffset());
 
-    return QRectF(centre - QPointF(handle.size/2, handle.size/2),
-                  centre + QPointF(handle.size/2, handle.size/2));
+    return QRectF(centre - QPointF(handle.size()/2, handle.size()/2),
+                  centre + QPointF(handle.size()/2, handle.size()/2));
 }
 
 void PieChartSlider::paintEvent(QPaintEvent *event){

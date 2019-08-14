@@ -50,24 +50,28 @@ protected:
 private:
     /* Internal types */
     struct Handle{
-        static const int size = 16;
         virtual ~Handle() = default;
+
+        static const int SIZE = 16;
+        virtual int size() const = 0;
+        virtual qreal radiusOffset() const
+            {return 0;}
 
         bool is_pressed = false;
         int angle = 0;
-
-        virtual qreal radiusOffset() const
-            {return 0;}
     };
 
-    struct DividerHandle : public Handle{};
+    struct DividerHandle : public Handle{
+        int size() const override {return DividerHandle::SIZE;}
+    };
 
     struct SectorHandle : public Handle{
+        int size() const override {return SectorHandle::SIZE;}
+        qreal radiusOffset() const override
+            {return -DividerHandle::SIZE/2 - (collapse_level + 0.5)*SectorHandle::SIZE;}
+
         int collapse_level = 0;
         bool visible = false;
-
-        qreal radiusOffset() const override
-            {return -DividerHandle::size - collapse_level*SectorHandle::size;}
     };
 
     /* Handle handling */
